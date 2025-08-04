@@ -10,6 +10,7 @@ from .groq_llm import get_answer, get_relevant_questions # Changed from groq_api
 from .sources_searcher import get_sources
 from .build_context import build_context
 from .sources_manipulation import populate_sources
+from mangum import Mangum  # to support AWS Lambda style (used by Vercel)
 
 
 app = FastAPI()
