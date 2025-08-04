@@ -1,5 +1,5 @@
 import logging
-from semantic_chunking import get_chunking # Updated import for simplified chunking
+from api.semantic_chunking import get_chunking # Updated import for simplified chunking
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
