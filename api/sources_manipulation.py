@@ -1,4 +1,4 @@
-from api.extract_content_from_website import extract_website_content
+from .extract_content_from_website import extract_website_content
 import logging
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
