@@ -29,19 +29,19 @@ app.add_middleware(
 load_dotenv()
 
 
-@app.get("/")
+@app.get("/api/")
 def root():
     """Root endpoint for a basic health check."""
     return {"message": "hello world perplexity alternative v1"}
 
 
-@app.get("/up_test")
+@app.get("/api/up_test")
 def up_test():
     """Endpoint for deployment health checks."""
     return {"status": "ok"}
 
 
-@app.get("/search")
+@app.get("/api/search")
 def ask(query: str, date_context: str, stored_location: str, pro_mode: bool = False):
     """
     Main search endpoint that orchestrates fetching sources, building context,
