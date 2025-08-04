@@ -7,4 +7,5 @@ langchain-community
 langchain
 langchain-huggingface
 groq
+mangum
 # ollama==0.2.0 # Ensure this is removed or commented out if you're not using Ollama
