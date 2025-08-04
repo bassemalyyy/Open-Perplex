@@ -6,10 +6,10 @@ load_dotenv() # Load environment variables from .env file
 from fastapi.responses import StreamingResponse
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from groq_llm import get_answer, get_relevant_questions # Changed from groq_api to ollama_api
-from sources_searcher import get_sources
-from build_context import build_context
-from sources_manipulation import populate_sources
+from api.groq_llm import get_answer, get_relevant_questions # Changed from groq_api to ollama_api
+from api.sources_searcher import get_sources
+from api.build_context import build_context
+from api.sources_manipulation import populate_sources
 from mangum import Mangum  # to support AWS Lambda style (used by Vercel)
 
 
