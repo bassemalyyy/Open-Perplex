@@ -79,7 +79,7 @@ import os
 import logging
 from langchain_core.prompts import PromptTemplate
 from groq import Groq
-from perplex.api.prompts import search_prompt_system, relevant_prompt_system
+from .prompts import search_prompt_system, relevant_prompt_system
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -92,7 +92,6 @@ logger = logging.getLogger(__name__)
 # Using llama3-8b-8192 which is one of the cheapest models on Groq
 GROQ_MODEL = "llama3-8b-8192"  # Cheapest model available
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")  # Get from environment variable
-print(f"GROQ_API_KEY: {GROQ_API_KEY}")  # Debugging line to check if the key is loaded correctly
 
 # Initialize Groq client
 try:
