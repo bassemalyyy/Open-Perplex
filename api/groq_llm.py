@@ -74,69 +74,239 @@
 #         # Return an empty JSON array for follow-up questions on error
 #         return json.dumps({"followUp": []})
 
-import json
+# import json
+# import os
+# import logging
+# from langchain_core.prompts import PromptTemplate
+# from groq import Groq
+# from api.prompts import search_prompt_system, relevant_prompt_system
+# from dotenv import load_dotenv
+
+# load_dotenv()
+
+# # Configure logging
+# logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# logger = logging.getLogger(__name__)
+
+# # Groq API Configuration
+# # Using llama3-8b-8192 which is one of the cheapest models on Groq
+# GROQ_MODEL = "llama3-8b-8192"  # Cheapest model available
+# GROQ_API_KEY = os.getenv("GROQ_API_KEY")  # Get from environment variable
+
+# # Initialize Groq client
+# try:
+#     if not GROQ_API_KEY:
+#         raise ValueError("GROQ_API_KEY environment variable is not set. Please set it in your .env file.")
+    
+#     client = Groq(api_key=GROQ_API_KEY)
+#     logger.info(f"Groq client initialized with model: {GROQ_MODEL}")
+# except Exception as e:
+#     logger.error(f"Failed to initialize Groq client: {e}")
+#     client = None
+
+# def get_answer(query, contexts, date_context):
+#     """
+#     Generates an answer using the Groq API, streaming the response.
+
+#     :param query: The user's question.
+#     :param contexts: Relevant contexts gathered from search results.
+#     :param date_context: Current date for contextualization.
+#     :return: A generator yielding chunks of the LLM's answer.
+#     """
+#     if client is None:
+#         # Fallback response when Groq client is not available
+#         logger.warning("Groq client not initialized, providing fallback response")
+#         fallback_response = f"Based on the available information about '{query}', here's what I found from the search results:\n\n{contexts[:500]}..."
+#         yield fallback_response
+#         return
+
+#     system_prompt_search = PromptTemplate(input_variables=["date_today"], template=search_prompt_system)
+
+#     messages = [
+#         {
+#             "role": "system", 
+#             "content": system_prompt_search.format(date_today=date_context)
+#         },
+#         {
+#             "role": "user", 
+#             "content": "User Question: " + query + "\n\nCONTEXTS:\n\n" + contexts
+#         }
+#     ]
+
+#     try:
+#         logger.info("Sending streaming request to Groq API for answer generation...")
+        
+#         # Call Groq chat API with streaming
+#         stream = client.chat.completions.create(
+#             model=GROQ_MODEL,
+#             messages=messages,
+#             stream=True,
+#             max_tokens=1024,
+#             temperature=0.7,
+#         )
+
+#         for chunk in stream:
+#             # Extract content from the streamed chunk
+#             if chunk.choices[0].delta.content is not None:
+#                 yield chunk.choices[0].delta.content
+
+#     except Exception as e:
+#         logger.exception(f"Error during Groq API call for answer: {e}")
+#         # Provide a fallback response with search context
+#         fallback_response = f"I encountered an issue processing your question about '{query}'. Based on the search results: {contexts[:300]}..."
+#         yield fallback_response
+
+
+# def get_relevant_questions(contexts, query):
+#     """
+#     Generates relevant follow-up questions using the Groq API.
+
+#     :param contexts: Relevant contexts.
+#     :param query: The original user query.
+#     :return: A JSON string containing an array of follow-up questions.
+#     """
+#     if client is None:
+#         # Provide some default relevant questions
+#         default_questions = [
+#             f"What are the latest developments regarding {query}?",
+#             f"How does {query} compare to similar topics?",
+#             f"What are the implications of {query}?"
+#         ]
+#         return json.dumps({"followUp": default_questions})
+
+#     messages = [
+#         {
+#             "role": "system",
+#             "content": relevant_prompt_system
+#         },
+#         {
+#             "role": "user",
+#             "content": "User Query: " + query + "\n\nContexts: " + contexts[:1000] + "\n"
+#         }
+#     ]
+
+#     try:
+#         logger.info("Sending request to Groq API for relevant questions...")
+        
+#         # Call Groq chat API for a non-streaming JSON response
+#         response = client.chat.completions.create(
+#             model=GROQ_MODEL,
+#             messages=messages,
+#             max_tokens=512,
+#             temperature=0.3,  # Lower temperature for more consistent JSON output
+#         )
+        
+#         generated_text = response.choices[0].message.content.strip()
+        
+#         if generated_text:
+#             try:
+#                 # Try to extract JSON from the response
+#                 if "{" in generated_text and "}" in generated_text:
+#                     json_start = generated_text.find("{")
+#                     json_end = generated_text.rfind("}") + 1
+#                     json_str = generated_text[json_start:json_end]
+                    
+#                     # Validate JSON
+#                     parsed_json = json.loads(json_str)
+#                     if "followUp" in parsed_json and isinstance(parsed_json["followUp"], list):
+#                         return json.dumps(parsed_json)
+                
+#                 # If no valid JSON found, create questions from the response
+#                 fallback_questions = [
+#                     f"Tell me more about {query}",
+#                     f"What are the recent updates on {query}?",
+#                     f"How significant is {query}?"
+#                 ]
+#                 return json.dumps({"followUp": fallback_questions})
+                
+#             except json.JSONDecodeError:
+#                 logger.warning(f"Groq API did not return valid JSON for relevant questions")
+#                 fallback_questions = [
+#                     f"What else should I know about {query}?",
+#                     f"Are there recent developments in {query}?",
+#                     f"What are the key aspects of {query}?"
+#                 ]
+#                 return json.dumps({"followUp": fallback_questions})
+#         else:
+#             logger.warning("No text generated for relevant questions.")
+#             return json.dumps({"followUp": []})
+
+#     except Exception as e:
+#         logger.exception(f"Error during Groq API call for relevant questions: {e}")
+#         # Return fallback questions
+#         fallback_questions = [
+#             f"What are the main points about {query}?",
+#             f"Can you provide more details on {query}?",
+#             f"What should I know about {query}?"
+#         ]
+#         return json.dumps({"followUp": fallback_questions})
+
+# api/groq_llm.py
+
 import os
+import json
 import logging
 from langchain_core.prompts import PromptTemplate
 from groq import Groq
 from api.prompts import search_prompt_system, relevant_prompt_system
-from dotenv import load_dotenv
 
-load_dotenv()
-
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# ─── Logging setup ─────────────────────────────────────────────────────────────
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
-# Groq API Configuration
-# Using llama3-8b-8192 which is one of the cheapest models on Groq
-GROQ_MODEL = "llama3-8b-8192"  # Cheapest model available
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")  # Get from environment variable
+# ─── ENVIRONMENT KEY LOADING ───────────────────────────────────────────────────
+# In local/dev, you can still use a .env file. In prod, Vercel will inject the real value.
+if os.getenv("VERCEL") is None:
+    # only attempt to load .env when NOT on Vercel
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+        logger.info("Loaded local .env file")
+    except ImportError:
+        logger.warning("python-dotenv not installed; skipping .env load")
 
-# Initialize Groq client
+# Get the Groq API key from the environment (set via `vercel env add`)
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "").strip()
+if not GROQ_API_KEY:
+    raise RuntimeError(
+        "❌ GROQ_API_KEY is not set! "
+        "Run `vercel env add GROQ_API_KEY production` and redeploy."
+    )
+
+# ─── Groq CLIENT INITIALIZATION ────────────────────────────────────────────────
+GROQ_MODEL = "llama3-8b-8192"
 try:
-    if not GROQ_API_KEY:
-        raise ValueError("GROQ_API_KEY environment variable is not set. Please set it in your .env file.")
-    
     client = Groq(api_key=GROQ_API_KEY)
-    logger.info(f"Groq client initialized with model: {GROQ_MODEL}")
+    logger.info(f"✅ Initialized Groq client with model: {GROQ_MODEL}")
 except Exception as e:
-    logger.error(f"Failed to initialize Groq client: {e}")
+    logger.exception(f"Failed to initialize Groq client: {e}")
     client = None
 
-def get_answer(query, contexts, date_context):
-    """
-    Generates an answer using the Groq API, streaming the response.
 
-    :param query: The user's question.
-    :param contexts: Relevant contexts gathered from search results.
-    :param date_context: Current date for contextualization.
-    :return: A generator yielding chunks of the LLM's answer.
+def get_answer(query: str, contexts: str, date_context: str):
+    """
+    Stream chunks of answer from Groq. Fallback to context if client is None.
     """
     if client is None:
-        # Fallback response when Groq client is not available
-        logger.warning("Groq client not initialized, providing fallback response")
-        fallback_response = f"Based on the available information about '{query}', here's what I found from the search results:\n\n{contexts[:500]}..."
-        yield fallback_response
+        logger.warning("Groq client unavailable—sending fallback response")
+        yield f"Based on '{query}': {contexts[:500]}..."
         return
 
-    system_prompt_search = PromptTemplate(input_variables=["date_today"], template=search_prompt_system)
+    system_prompt = PromptTemplate(
+        input_variables=["date_today"],
+        template=search_prompt_system
+    ).format(date_today=date_context)
 
     messages = [
-        {
-            "role": "system", 
-            "content": system_prompt_search.format(date_today=date_context)
-        },
-        {
-            "role": "user", 
-            "content": "User Question: " + query + "\n\nCONTEXTS:\n\n" + contexts
-        }
+        {"role": "system", "content": system_prompt},
+        {"role": "user",   "content": f"User Question: {query}\n\nCONTEXTS:\n\n{contexts}"},
     ]
 
     try:
-        logger.info("Sending streaming request to Groq API for answer generation...")
-        
-        # Call Groq chat API with streaming
+        logger.info("Streaming request to Groq API for answer generation…")
         stream = client.chat.completions.create(
             model=GROQ_MODEL,
             messages=messages,
@@ -144,99 +314,59 @@ def get_answer(query, contexts, date_context):
             max_tokens=1024,
             temperature=0.7,
         )
-
         for chunk in stream:
-            # Extract content from the streamed chunk
-            if chunk.choices[0].delta.content is not None:
-                yield chunk.choices[0].delta.content
-
+            delta = chunk.choices[0].delta.content
+            if delta:
+                yield delta
     except Exception as e:
-        logger.exception(f"Error during Groq API call for answer: {e}")
-        # Provide a fallback response with search context
-        fallback_response = f"I encountered an issue processing your question about '{query}'. Based on the search results: {contexts[:300]}..."
-        yield fallback_response
+        logger.exception(f"Error during Groq streaming call: {e}")
+        yield f"I’m sorry, something went wrong generating the answer for '{query}'."
 
-
-def get_relevant_questions(contexts, query):
+def get_relevant_questions(contexts: str, query: str) -> str:
     """
-    Generates relevant follow-up questions using the Groq API.
-
-    :param contexts: Relevant contexts.
-    :param query: The original user query.
-    :return: A JSON string containing an array of follow-up questions.
+    Return a JSON string with `{"followUp": […]}` of suggested follow-ups.
     """
     if client is None:
-        # Provide some default relevant questions
-        default_questions = [
-            f"What are the latest developments regarding {query}?",
-            f"How does {query} compare to similar topics?",
-            f"What are the implications of {query}?"
-        ]
-        return json.dumps({"followUp": default_questions})
+        logger.warning("Groq client unavailable—using default follow-ups")
+        return json.dumps({
+            "followUp": [
+                f"What else should I know about {query}?",
+                f"Recent updates on {query}?",
+                f"How significant is {query}?"
+            ]
+        })
 
     messages = [
-        {
-            "role": "system",
-            "content": relevant_prompt_system
-        },
-        {
-            "role": "user",
-            "content": "User Query: " + query + "\n\nContexts: " + contexts[:1000] + "\n"
-        }
+        {"role": "system", "content": relevant_prompt_system},
+        {"role": "user",   "content": f"User Query: {query}\n\nContexts: {contexts[:1000]}"},
     ]
 
     try:
-        logger.info("Sending request to Groq API for relevant questions...")
-        
-        # Call Groq chat API for a non-streaming JSON response
-        response = client.chat.completions.create(
+        logger.info("Requesting relevant questions from Groq API…")
+        resp = client.chat.completions.create(
             model=GROQ_MODEL,
             messages=messages,
             max_tokens=512,
-            temperature=0.3,  # Lower temperature for more consistent JSON output
+            temperature=0.3,
         )
-        
-        generated_text = response.choices[0].message.content.strip()
-        
-        if generated_text:
-            try:
-                # Try to extract JSON from the response
-                if "{" in generated_text and "}" in generated_text:
-                    json_start = generated_text.find("{")
-                    json_end = generated_text.rfind("}") + 1
-                    json_str = generated_text[json_start:json_end]
-                    
-                    # Validate JSON
-                    parsed_json = json.loads(json_str)
-                    if "followUp" in parsed_json and isinstance(parsed_json["followUp"], list):
-                        return json.dumps(parsed_json)
-                
-                # If no valid JSON found, create questions from the response
-                fallback_questions = [
-                    f"Tell me more about {query}",
-                    f"What are the recent updates on {query}?",
-                    f"How significant is {query}?"
-                ]
-                return json.dumps({"followUp": fallback_questions})
-                
-            except json.JSONDecodeError:
-                logger.warning(f"Groq API did not return valid JSON for relevant questions")
-                fallback_questions = [
-                    f"What else should I know about {query}?",
-                    f"Are there recent developments in {query}?",
-                    f"What are the key aspects of {query}?"
-                ]
-                return json.dumps({"followUp": fallback_questions})
-        else:
-            logger.warning("No text generated for relevant questions.")
-            return json.dumps({"followUp": []})
+        text = resp.choices[0].message.content.strip()
 
+        # extract JSON blob if present
+        if "{" in text and "}" in text:
+            start = text.find("{")
+            end   = text.rfind("}") + 1
+            candidate = text[start:end]
+            parsed = json.loads(candidate)
+            if isinstance(parsed.get("followUp"), list):
+                return json.dumps(parsed)
     except Exception as e:
-        logger.exception(f"Error during Groq API call for relevant questions: {e}")
-        # Return fallback questions
-        fallback_questions = [
+        logger.exception(f"Error fetching relevant questions: {e}")
+
+    # fallback questions
+    return json.dumps({
+        "followUp": [
             f"What are the main points about {query}?",
             f"Can you provide more details on {query}?",
             f"What should I know about {query}?"
         ]
-        return json.dumps({"followUp": fallback_questions})
+    })
