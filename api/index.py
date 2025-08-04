@@ -10,7 +10,6 @@ from api.groq_llm import get_answer, get_relevant_questions # Changed from groq_
 from api.sources_searcher import get_sources
 from api.build_context import build_context
 from api.sources_manipulation import populate_sources
-from mangum import Mangum  # to support AWS Lambda style (used by Vercel)
 
 
 app = FastAPI()
@@ -100,6 +99,3 @@ def ask(query: str, date_context: str, stored_location: str, pro_mode: bool = Fa
             yield f"data:{json.dumps({'type': 'error', 'data': 'We are currently experiencing some issues. Please try again later.'}).decode()}\n\n"
 
     return StreamingResponse(generate(), media_type="text/event-stream")
-
-# Needed for Vercel's serverless handler
-handler = Mangum(app)
