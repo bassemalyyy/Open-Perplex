@@ -99,3 +99,6 @@ def ask(query: str, date_context: str, stored_location: str, pro_mode: bool = Fa
             yield f"data:{json.dumps({'type': 'error', 'data': 'We are currently experiencing some issues. Please try again later.'}).decode()}\n\n"
 
     return StreamingResponse(generate(), media_type="text/event-stream")
+
+# Needed for Vercel's serverless handler
+handler = Mangum(app)
