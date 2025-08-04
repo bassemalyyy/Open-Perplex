@@ -262,7 +262,7 @@
                 // --- IMPORTANT CHANGE FOR VERCEL DEPLOYMENT ---
                 // Use a relative path for the backend API endpoint
                 // Vercel routes requests to /api/ to your backend serverless function
-                const backendUrl = `/api/main?query=${encodeURIComponent(query)}&date_context=${encodeURIComponent(dateContext)}&stored_location=${encodeURIComponent(storedLocation)}&pro_mode=${proMode}`;
+                const backendUrl = `/api/search?query=${encodeURIComponent(query)}&date_context=${encodeURIComponent(dateContext)}&stored_location=${encodeURIComponent(storedLocation)}&pro_mode=${proMode}`;
                 // --- END IMPORTANT CHANGE ---
 
                 try {
