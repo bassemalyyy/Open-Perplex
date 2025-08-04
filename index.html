@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <br><br>
-    <title>Open Perplex</title>
-    <link rel="icon" type="image/ico" href="favicon.ico">
+    <title>Perplexity AI Alternative</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts - Inter for a clean, modern look -->
@@ -216,7 +214,7 @@
 
     <!-- Footer -->
     <footer class="bg-gray-800 text-white text-center py-4 mt-auto">
-        <p>&copy; 2025 Perplexity AI Alternative. All rights reserved.</p>
+        <p>&copy; 2025 Open Perplex. All rights reserved.</p>
     </footer>
 
     <script>
@@ -260,9 +258,11 @@
                 // Get current date in YYYY-MM-DD format for context
                 const dateContext = new Date().toISOString().split('T')[0]; 
 
-                // Construct the backend URL.
-                // Assuming the FastAPI backend is running on http://localhost:8000
-                const backendUrl = `http://localhost:8000/search?query=${encodeURIComponent(query)}&date_context=${encodeURIComponent(dateContext)}&stored_location=${encodeURIComponent(storedLocation)}&pro_mode=${proMode}`;
+                // --- IMPORTANT CHANGE FOR VERCEL DEPLOYMENT ---
+                // Use a relative path for the backend API endpoint
+                // Vercel routes requests to /api/ to your backend serverless function
+                const backendUrl = `/api/search?query=${encodeURIComponent(query)}&date_context=${encodeURIComponent(dateContext)}&stored_location=${encodeURIComponent(storedLocation)}&pro_mode=${proMode}`;
+                // --- END IMPORTANT CHANGE ---
 
                 try {
                     const response = await fetch(backendUrl);
@@ -340,18 +340,17 @@
                                 }
                             } else if (event.startsWith('event: end-of-stream')) {
                                 // End of stream event
-                                loadingIndicator.classList.add('hidden');
-                                break; // Exit the loop
+                                console.log("End of stream event received.");
                             }
                         }
                     }
                 } catch (error) {
                     console.error('Fetch error:', error);
-                    loadingIndicator.classList.add('hidden');
                     aiAnswerDiv.classList.remove('hidden');
                     aiAnswerDiv.innerHTML = `<p class="text-red-500">An error occurred: ${error.message}. Please check if the backend server is running and your API keys are set correctly.</p>`;
                 } finally {
-                    loadingIndicator.classList.add('hidden'); // Ensure loading indicator is hidden
+                    // Ensure loading indicator is hidden regardless of success or failure
+                    loadingIndicator.classList.add('hidden'); 
                 }
             };
 
