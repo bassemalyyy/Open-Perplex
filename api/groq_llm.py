@@ -79,7 +79,7 @@ import os
 import logging
 from langchain_core.prompts import PromptTemplate
 from groq import Groq
-from .prompts import search_prompt_system, relevant_prompt_system
+from prompts import search_prompt_system, relevant_prompt_system
 from dotenv import load_dotenv
 
 load_dotenv()
