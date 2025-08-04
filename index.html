@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <br><br>
+    <title>Open Perplex</title>
+    <link rel="icon" type="image/ico" href="favicon.ico">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter for a clean, modern look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        /* Custom styles to mimic Perplexity's look and feel */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Light gray background */
+            color: #333;
+        }
+        .container {
+            max-width: 960px; /* Max width for content */
+            margin: 0 auto; /* Center the container */
+            padding: 20px;
+        }
+        .chat-bubble {
+            background-color: #fff; /* White background for content blocks */
+            border-radius: 12px; /* Rounded corners for chat bubbles */
+            padding: 16px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Subtle shadow */
+            margin-bottom: 15px;
+        }
+        .source-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee; /* Separator for source items */
+        }
+        .source-item:last-child {
+            border-bottom: none; /* No border for the last item */
+        }
+        .source-icon {
+            flex-shrink: 0; /* Prevent icon from shrinking */
+            width: 24px;
+            height: 24px;
+            background-color: #e0e0e0; /* Gray background for source numbers */
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #555;
+            margin-right: 10px;
+        }
+        .related-question-item {
+            background-color: #e6f2ff; /* Light blue background for related questions */
+            border-left: 4px solid #3b82f6; /* Blue left border */
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer; /* Indicate clickable */
+            transition: background-color 0.2s ease; /* Smooth hover effect */
+        }
+        .related-question-item:hover {
+            background-color: #d0e7ff; /* Darker blue on hover */
+        }
+        /* Loading animation for text */
+        .loading-dots span {
+            animation: blink 1.4s infinite both;
+        }
+        .loading-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .loading-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        @keyframes blink {
+            0% { opacity: 0.2; }
+            20% { opacity: 1; }
+            100% { opacity: 0.2; }
+        }
+        /* Spinner animation */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #3b82f6; /* Blue spinner */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Basic markdown styling for prose content */
+        /* Applying Tailwind's prose classes for good default typography */
+        .prose {
+            color: #333;
+            line-height: 1.6;
+        }
+        .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+            color: #1a202c;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            font-weight: 600;
+        }
+        .prose p {
+            margin-bottom: 1em;
+        }
+        .prose ul, .prose ol {
+            margin-bottom: 1em;
+            padding-left: 1.5em;
+            list-style-type: disc; /* Default for ul */
+        }
+        .prose ol {
+            list-style-type: decimal; /* Default for ol */
+        }
+        .prose li {
+            margin-bottom: 0.5em;
+        }
+        .prose a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        .prose a:hover {
+            text-decoration: underline;
+        }
+        .prose code {
+            background-color: #f3f4f6;
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+        }
+        .prose pre {
+            background-color: #2d3748;
+            color: #edf2f7;
+            padding: 1em;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        .prose table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1em;
+        }
+        .prose th, .prose td {
+            border: 1px solid #e2e8f0;
+            padding: 0.5em 0.75em;
+            text-align: left;
+        }
+        .prose th {
+            background-color: #edf2f7;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+    <div class="container flex-grow py-8">
+        <h1 class="text-4xl font-bold text-center mb-10 text-gray-800">Open Perplex</h1>
+
+        <!-- Search Input Section -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div class="flex items-center border border-gray-300 rounded-full focus-within:ring-2 focus-within:ring-blue-500 transition-all duration-200">
+                <input type="text" id="queryInput" placeholder="Ask anything..." class="flex-grow px-5 py-3 text-lg rounded-l-full focus:outline-none bg-transparent">
+                <button id="searchButton" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-r-full transition-colors duration-200">
+                    Search
+                </button>
+            </div>
+            <div class="mt-4 flex items-center justify-end space-x-4 text-sm text-gray-600">
+                <label class="flex items-center cursor-pointer">
+                    <input type="checkbox" id="proModeToggle" class="form-checkbox h-4 w-4 text-blue-600 rounded">
+                    <span class="ml-2">Pro Mode (more detailed search)</span>
+                </label>
+                <div class="relative">
+                    <select id="locationSelect" class="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-2 px-3 pr-8 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-blue-500">
+                        <option value="us">United States</option>
+                        <option value="gb">United Kingdom</option>
+                        <option value="in">India</option>
+                        <option value="de">Germany</option>
+                        <option value="fr">France</option>
+                        <option value="jp">Japan</option>
+                        <option value="br">Brazil</option>
+                        <option value="ca">Canada</option>
+                        <!-- Add more locations as needed -->
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Response Area -->
+        <div id="responseArea" class="mt-8">
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="hidden flex justify-center items-center py-10">
+                <div class="spinner mr-3"></div>
+                <span class="text-lg text-gray-600">Thinking...</span>
+            </div>
+            <!-- AI Answer Display -->
+            <div id="aiAnswer" class="chat-bubble prose lg:prose-lg max-w-none hidden"></div>
+            <!-- Sources Display -->
+            <div id="sourcesContainer" class="chat-bubble hidden">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Sources</h3>
+                <div id="sourcesList"></div>
+            </div>
+            <!-- Related Questions Display -->
+            <div id="relatedQuestionsContainer" class="chat-bubble hidden">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Related Questions</h3>
+                <div id="relatedQuestionsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white text-center py-4 mt-auto">
+        <p>&copy; 2025 Perplexity AI Alternative. All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get references to DOM elements
+            const queryInput = document.getElementById('queryInput');
+            const searchButton = document.getElementById('searchButton');
+            const proModeToggle = document.getElementById('proModeToggle');
+            const locationSelect = document.getElementById('locationSelect');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const aiAnswerDiv = document.getElementById('aiAnswer');
+            const sourcesContainer = document.getElementById('sourcesContainer');
+            const sourcesList = document.getElementById('sourcesList');
+            const relatedQuestionsContainer = document.getElementById('relatedQuestionsContainer');
+            const relatedQuestionsList = document.getElementById('relatedQuestionsList');
+
+            let currentMarkdownContent = ''; // Variable to accumulate Markdown content
+
+            // Function to clear previous search results and hide containers
+            const clearResults = () => {
+                aiAnswerDiv.innerHTML = '';
+                sourcesList.innerHTML = '';
+                relatedQuestionsList.innerHTML = '';
+                aiAnswerDiv.classList.add('hidden');
+                sourcesContainer.classList.add('hidden');
+                relatedQuestionsContainer.classList.add('hidden');
+                loadingIndicator.classList.add('hidden');
+                currentMarkdownContent = ''; // Reset accumulated Markdown
+            };
+
+            // Main function to fetch and display the answer
+            const fetchAnswer = async () => {
+                const query = queryInput.value.trim();
+                if (!query) return; // Do nothing if query is empty
+
+                clearResults(); // Clear previous results
+                loadingIndicator.classList.remove('hidden'); // Show loading indicator
+
+                const proMode = proModeToggle.checked;
+                const storedLocation = locationSelect.value;
+                // Get current date in YYYY-MM-DD format for context
+                const dateContext = new Date().toISOString().split('T')[0]; 
+
+                // Construct the backend URL.
+                // Assuming the FastAPI backend is running on http://localhost:8000
+                const backendUrl = `http://localhost:8000/search?query=${encodeURIComponent(query)}&date_context=${encodeURIComponent(dateContext)}&stored_location=${encodeURIComponent(storedLocation)}&pro_mode=${proMode}`;
+
+                try {
+                    const response = await fetch(backendUrl);
+                    if (!response.ok) {
+                        // Handle HTTP errors (e.g., 400, 500)
+                        const errorData = await response.json();
+                        throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+                    }
+
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder('utf-8');
+
+                    let buffer = ''; // Buffer to accumulate streamed data
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break; // Stream finished
+
+                        buffer += decoder.decode(value, { stream: true });
+
+                        // Process each complete Server-Sent Event message
+                        let eventEndIndex;
+                        while ((eventEndIndex = buffer.indexOf('\n\n')) !== -1) {
+                            const event = buffer.substring(0, eventEndIndex);
+                            buffer = buffer.substring(eventEndIndex + 2); // Remove processed event from buffer
+
+                            if (event.startsWith('data:')) {
+                                const jsonData = event.substring(5);
+                                try {
+                                    const parsedData = JSON.parse(jsonData);
+                                    aiAnswerDiv.classList.remove('hidden'); // Ensure AI answer area is visible
+
+                                    if (parsedData.type === 'llm') {
+                                        // Append LLM answer chunks to the Markdown content
+                                        currentMarkdownContent += parsedData.text;
+                                        // Re-parse and render the entire accumulated Markdown
+                                        aiAnswerDiv.innerHTML = marked.parse(currentMarkdownContent);
+                                    } else if (parsedData.type === 'sources') {
+                                        sourcesContainer.classList.remove('hidden'); // Show sources container
+                                        parsedData.data.organic.forEach((source, index) => {
+                                            // Create and append source items
+                                            const sourceItem = document.createElement('div');
+                                            sourceItem.className = 'source-item';
+                                            sourceItem.innerHTML = `
+                                                <div class="source-icon">${index + 1}</div>
+                                                <div>
+                                                    <a href="${source.link}" target="_blank" class="text-blue-600 hover:underline font-medium">${source.title}</a>
+                                                    <p class="text-sm text-gray-600">${source.snippet}</p>
+                                                </div>
+                                            `;
+                                            sourcesList.appendChild(sourceItem);
+                                        });
+                                    } else if (parsedData.type === 'relevant') {
+                                        relatedQuestionsContainer.classList.remove('hidden'); // Show related questions container
+                                        if (parsedData.data && parsedData.data.followUp) {
+                                            parsedData.data.followUp.forEach(question => {
+                                                // Create and append related question items
+                                                const questionItem = document.createElement('div');
+                                                questionItem.className = 'related-question-item';
+                                                questionItem.textContent = question;
+                                                // Make related questions clickable to trigger new searches
+                                                questionItem.onclick = () => {
+                                                    queryInput.value = question;
+                                                    fetchAnswer();
+                                                };
+                                                relatedQuestionsList.appendChild(questionItem);
+                                            });
+                                        }
+                                    } else if (parsedData.type === 'error') {
+                                        // Display error message from backend
+                                        aiAnswerDiv.innerHTML = `<p class="text-red-500">${parsedData.data}</p>`;
+                                    }
+                                } catch (jsonError) {
+                                    console.error('Error parsing JSON:', jsonError, 'Raw data:', jsonData);
+                                    aiAnswerDiv.innerHTML = `<p class="text-red-500">Error processing response data.</p>`;
+                                }
+                            } else if (event.startsWith('event: end-of-stream')) {
+                                // End of stream event
+                                loadingIndicator.classList.add('hidden');
+                                break; // Exit the loop
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Fetch error:', error);
+                    loadingIndicator.classList.add('hidden');
+                    aiAnswerDiv.classList.remove('hidden');
+                    aiAnswerDiv.innerHTML = `<p class="text-red-500">An error occurred: ${error.message}. Please check if the backend server is running and your API keys are set correctly.</p>`;
+                } finally {
+                    loadingIndicator.classList.add('hidden'); // Ensure loading indicator is hidden
+                }
+            };
+
+            // Event listeners for search button and Enter key in input field
+            searchButton.addEventListener('click', fetchAnswer);
+            queryInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    fetchAnswer();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
