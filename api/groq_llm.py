@@ -242,13 +242,12 @@
 #         return json.dumps({"followUp": fallback_questions})
 
 # api/groq_llm.py
-
 import os
 import json
 import logging
 from langchain_core.prompts import PromptTemplate
 from groq import Groq
-from api.prompts import search_prompt_system, relevant_prompt_system
+from api.prompts import search_prompt_system, relevant_prompt_system # Assuming api.prompts is correct
 
 # ─── Logging setup ─────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -258,22 +257,15 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ─── ENVIRONMENT KEY LOADING ───────────────────────────────────────────────────
-# In local/dev, you can still use a .env file. In prod, Vercel will inject the real value.
-if os.getenv("VERCEL") is None:
-    # only attempt to load .env when NOT on Vercel
-    try:
-        from dotenv import load_dotenv
-        load_dotenv()
-        logger.info("Loaded local .env file")
-    except ImportError:
-        logger.warning("python-dotenv not installed; skipping .env load")
-
-# Get the Groq API key from the environment (set via `vercel env add`)
+# On Vercel, environment variables are automatically injected.
+# For local development, ensure GROQ_API_KEY is set in your shell or .env (if using dotenv locally).
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "").strip()
 if not GROQ_API_KEY:
+    # This RuntimeError will prevent the Vercel function from starting if the key is missing.
+    # On Vercel, this means you haven't set it in your project settings.
     raise RuntimeError(
         "❌ GROQ_API_KEY is not set! "
-        "Run `vercel env add GROQ_API_KEY production` and redeploy."
+        "Please ensure it's configured in your Vercel project's Environment Variables."
     )
 
 # ─── Groq CLIENT INITIALIZATION ────────────────────────────────────────────────
@@ -302,7 +294,7 @@ def get_answer(query: str, contexts: str, date_context: str):
 
     messages = [
         {"role": "system", "content": system_prompt},
-        {"role": "user",   "content": f"User Question: {query}\n\nCONTEXTS:\n\n{contexts}"},
+        {"role": "user",    "content": f"User Question: {query}\n\nCONTEXTS:\n\n{contexts}"},
     ]
 
     try:
@@ -338,7 +330,7 @@ def get_relevant_questions(contexts: str, query: str) -> str:
 
     messages = [
         {"role": "system", "content": relevant_prompt_system},
-        {"role": "user",   "content": f"User Query: {query}\n\nContexts: {contexts[:1000]}"},
+        {"role": "user",    "content": f"User Query: {query}\n\nContexts: {contexts[:1000]}"},
     ]
 
     try:
@@ -354,7 +346,7 @@ def get_relevant_questions(contexts: str, query: str) -> str:
         # extract JSON blob if present
         if "{" in text and "}" in text:
             start = text.find("{")
-            end   = text.rfind("}") + 1
+            end    = text.rfind("}") + 1
             candidate = text[start:end]
             parsed = json.loads(candidate)
             if isinstance(parsed.get("followUp"), list):
