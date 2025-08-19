@@ -52,7 +52,7 @@ Backend:
 
 -   Serper API: For fetching real-time Google search results.
 
--   `langchain-community` / `langchain-huggingface` / `groq`: Python libraries for interacting with LLMs and web scraping tools.
+-   `langchain-community` / `groq`: Python libraries for interacting with LLMs and web scraping tools.
 
 -   `orjson`: Faster JSON serialization.
 
