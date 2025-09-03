@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Open Perplex</title>
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.png" type="image/png">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts - Inter for a clean, modern look -->
@@ -173,43 +173,53 @@
 </head>
 <body class="bg-gray-100 flex flex-col min-h-screen">
     <div class="container flex-grow py-8">
+        <br><br><br>
         <h1 class="text-4xl font-bold text-center mb-10 text-gray-800">Open Perplex</h1>
 
         <!-- Search Input Section -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-            <!-- Changed to flex-wrap for mobile layout -->
-            <div class="flex flex-wrap items-center border border-gray-300 rounded-full focus-within:ring-2 focus-within:ring-blue-500 transition-all duration-200">
-                <!-- Input takes full width on mobile, auto on md and up -->
-                <input type="text" id="queryInput" placeholder="Ask anything..." class="flex-grow px-5 py-3 text-lg rounded-l-full focus:outline-none bg-transparent w-full md:w-auto">
-                <!-- Button takes full width on mobile, auto on md and up, with top margin when wrapped -->
-                <button id="searchButton" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 md:px-6 rounded-r-full transition-colors duration-200 flex-shrink-0 w-full md:w-auto mt-2 md:mt-0">
-                    Search
-                </button>
-            </div>
-            <!-- Responsive options row -->
-            <div class="mt-4 flex flex-col md:flex-row items-start md:items-center justify-start md:justify-end gap-4 md:space-x-4 text-sm text-gray-600">
-                <label class="flex items-center cursor-pointer">
-                    <input type="checkbox" id="proModeToggle" class="form-checkbox h-4 w-4 text-blue-600 rounded">
-                    <span class="ml-2">Pro Mode (more detailed search)</span>
-                </label>
-                <div class="relative w-full md:w-auto">
-                    <select id="locationSelect" class="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-2 px-3 pr-8 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-blue-500">
-                        <option value="us">United States</option>
-                        <option value="gb">United Kingdom</option>
-                        <option value="in">India</option>
-                        <option value="de">Germany</option>
-                        <option value="fr">France</option>
-                        <option value="jp">Japan</option>
-                        <option value="br">Brazil</option>
-                        <option value="ca">Canada</option>
-                        <!-- Add more locations as needed -->
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                    </div>
-                </div>
+<div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+    <div class="flex flex-col md:flex-row md:items-center border border-gray-300 rounded-full md:rounded-full focus-within:ring-2 focus-within:ring-blue-500 transition-all duration-200">
+        <!-- Input field -->
+        <input 
+            type="text" 
+            id="queryInput" 
+            placeholder="Ask anything..." 
+            class="flex-grow px-5 py-3 text-lg rounded-t-full md:rounded-l-full md:rounded-t-none focus:outline-none bg-transparent"
+        >
+        <!-- Search button -->
+        <button 
+            id="searchButton" 
+            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-b-full md:rounded-r-full md:rounded-b-none transition-colors duration-200"
+        >
+            Search
+        </button>
+    </div>
+    
+    <!-- Options row -->
+    <div class="mt-4 flex flex-col md:flex-row items-start md:items-center justify-start md:justify-end gap-4 text-sm text-gray-600">
+        <label class="flex items-center cursor-pointer">
+            <input type="checkbox" id="proModeToggle" class="form-checkbox h-4 w-4 text-blue-600 rounded">
+            <span class="ml-2">Pro Mode (more detailed search)</span>
+        </label>
+        <div class="relative w-full md:w-auto">
+            <select id="locationSelect" class="block w-full bg-white border border-gray-300 text-gray-700 py-2 px-3 pr-8 rounded-md leading-tight focus:outline-none focus:border-blue-500">
+                <option value="us">United States</option>
+                <option value="gb">United Kingdom</option>
+                <option value="in">India</option>
+                <option value="de">Germany</option>
+                <option value="fr">France</option>
+                <option value="jp">Japan</option>
+                <option value="br">Brazil</option>
+                <option value="ca">Canada</option>
+            </select>
+            <!-- <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                </svg> -->
             </div>
         </div>
+    </div>
+</div>
 
         <!-- Response Area -->
         <div id="responseArea" class="mt-8">
