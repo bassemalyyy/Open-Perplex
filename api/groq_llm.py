@@ -269,7 +269,7 @@ if not GROQ_API_KEY:
     )
 
 # ─── Groq CLIENT INITIALIZATION ────────────────────────────────────────────────
-GROQ_MODEL = "llama3-8b-8192"
+GROQ_MODEL = "openai/gpt-oss-20b"
 try:
     client = Groq(api_key=GROQ_API_KEY)
     logger.info(f"✅ Initialized Groq client with model: {GROQ_MODEL}")
